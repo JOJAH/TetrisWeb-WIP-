@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="tetrisContainer">
+    
+    </div>
+
+
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+    }
+    #tetrisContainer{
+        display: grid;
+        grid-template-columns: repeat(10, 20px);
+        grid-template-rows: repeat(20, 20px);
+    }
+    .cell{
+        border: 1px solid black;
+    }
+    .moving{
+        
+    }
+</style>
+
+<script>
+    const numColumns = 10;
+    const numRows = 20;
+
+    const container = document.getElementById('tetrisContainer');
+    for(let i = 0; i < numColumns*numRows; i++){
+        const cell = document.createElement('div');
+        cell.setAttribute('class','cell')
+        container.appendChild(cell)
+    }
+
+
+    const Tetrads = {
+        I: [
+            [1,1,1,1]
+        ],
+
+        J: [
+            [1,0,0],
+            [1,1,1],
+        ],
+
+        L: [
+            [1,1,1],
+            [1,0,0]
+        ],
+
+        O: [
+            [1,1],
+            [1,1]
+        ],
+
+        S: [
+            [0,1,1],
+            [1,1,0]
+        ],
+    
+        Z: [
+            [1,1,0],
+            [0,1,1]
+        ],
+
+        T: [
+            [1,1,1],
+            [0,1,0]
+        ]
+    }
+    const TetradColours = {
+        I: 'rgb(43, 202, 226)',
+        J: 'rgb(15, 9, 190)',
+        L: 'rgb(240, 109, 44)',
+        O: 'rgb(216, 181, 22)',
+        S: 'rgb(99, 223, 23)',
+        Z: 'rgb(228, 54, 54)',
+        T: 'rgb(198, 23, 207)',
+    }
+
+
+    // set grid elements to empty
+    let grid = [];
+    for(let i=0; i< numRows; i++ ){
+        row = Array(numColumns).fill(0);
+        grid.push(row);
+    }
+
+    function getRandomTetrad(){
+        const tetradKeys = Object.keys(Tetrads)
+        const tetrad = tetradKeys[Math.floor(Math.random()*7)]
+
+        return {
+            type:tetrad,
+            shape:Tetrads[tetrad],
+            colour: TetradColours[tetrad],
+            x: 3,
+            y: 0
+        }
+    }
+
+let cells = document.getElementsByClassName('cell')
+
+    function createTetrad(){
+        const {shape, colour, x , y} = activeTetrad;
+        shape.forEach((row, i) =>{
+            row.forEach((cell, j)=>{
+                if(cell == 1){
+                    index = (y+i) * numColumns + (x + j);
+                    cells[index].style.background = colour
+                    cells[index].classList.add('moving');
+                }
+            });
+        });
+    }
+
+    function removeTetrad(){
+        const {shape, colour, x , y} = activeTetrad;
+        shape.forEach((row, i) =>{
+            row.forEach((cell, j)=>{
+                if(cell == 1){
+                    index = (y + i) * numColumns + (x + j);
+                    cells[index].style.removeProperty('background');
+                    cells[index].classList.remove('moving');
+                }
+            });
+        });
+    }
+
+    function moveTetradDown(){
+        removeTetrad();
+        activeTetrad.y++;
+        createTetrad();
+    }
+
+
+    function rotateTetrad(){
+        let {shape, x} = activeTetrad;
+
+        const rotatedColumn = shape.length;
+        const rotatedRow = shape[0].length;
+
+        let rotatedShape = []
+        for( let col = 0; col < rotatedRow; col++){
+            newRow = [];
+            for( let row = rotatedColumn -1 ; row >= 0; row--){ // iterates downwards as to rotate 90 degrees 
+                newRow.push(shape[row][col]);
+            }
+            rotatedShape.push(newRow)
+        }
+    //stop tetrad rotatoing over the right border
+        if(rotatedShape[0].length + x >= numColumns){
+            x = numColumns - rotatedShape[0].length ;
+        }
+
+        removeTetrad();
+        activeTetrad.shape = rotatedShape
+        activeTetrad.x = x
+        createTetrad();
+    }
+
+    function moveLeft(){
+        if(activeTetrad.x > 0){
+            removeTetrad();
+            activeTetrad.x--;
+            createTetrad();
+        }
+    }
+    function moveRight(){
+        const width = activeTetrad.shape[0].length;
+            if(activeTetrad.x < numColumns - width){
+                removeTetrad();
+                activeTetrad.x++;
+                createTetrad();
+                }
+
+    }
+    function moveDown(){
+        removeTetrad();
+        activeTetrad.y++;
+        createTetrad();
+        
+    }
+
+
+document.addEventListener('keydown', (event)=>{
+    if(event.key === 'ArrowUp'){
+        rotateTetrad()
+    }
+    if(event.key === 'ArrowLeft'){
+        moveLeft();
+    }
+    if(event.key === 'ArrowRight'){
+        moveRight();
+    }
+    if(event.key === 'ArrowDown'){
+        moveDown();
+    }
+});
+
+let activeTetrad = getRandomTetrad()
+
+createTetrad()
+let gameSpeed = 1000;
+setInterval(moveTetradDown, gameSpeed)
+
+
+</script>
+
+</body>
+</html>
