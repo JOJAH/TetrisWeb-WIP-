@@ -7,10 +7,7 @@
 </head>
 <body>
     
-    <div id="tetrisContainer">
-    
-    </div>
-
+    <div id="tetrisContainer"></div>
 
 <style>
     body{
@@ -20,14 +17,13 @@
     #tetrisContainer{
         display: grid;
         grid-template-columns: repeat(10, 20px);
-        grid-template-rows: repeat(20, 20px);
+        
     }
     .cell{
         border: 1px solid black;
+        height: 20px;
     }
-    .moving{
-        
-    }
+
 </style>
 
 <script>
@@ -98,13 +94,24 @@
     function getRandomTetrad(){
         const tetradKeys = Object.keys(Tetrads)
         const tetrad = tetradKeys[Math.floor(Math.random()*7)]
+        if(tetrad == 'I'){
+            lowestPoint = -1;
+        }else{
+            lowestPoint = 0;
+        }
+        if(tetrad == 'O'){
+            x = 4;
+        }else{
+            x =3;
+        }
 
         return {
             type:tetrad,
             shape:Tetrads[tetrad],
             colour: TetradColours[tetrad],
-            x: 3,
-            y: 0
+            x: x,
+            y: 0,
+            lowestPoint: lowestPoint
         }
     }
 
@@ -136,19 +143,59 @@ let cells = document.getElementsByClassName('cell')
         });
     }
 
+    function checkCollision(){
+        const {shape, x ,y, lowestPoint} = activeTetrad;
+        if(lowestPoint >= numRows-1){
+            activeTetrad.y--;
+            return true;
+        }
+
+        for(let i = 0; i < shape.length; i++){
+            for(let j = 0; j < shape[i].length; j++){
+                if(shape[i][j] == 1){
+                    lowerY = y+i;
+                    if(grid[lowerY][x+j] == 1){
+                        activeTetrad.y--
+                        return true
+                    }
+                }
+            }
+        }
+    }
+
+    function placeTetrad(){
+        const {shape, x ,y} = activeTetrad;
+        shape.forEach((row, i)=>{
+            row.forEach((cell, j) =>{
+                if(cell == 1){
+                    grid[y+i][x+j] = 1
+                }
+            });
+        });
+    }
+    
     function moveTetradDown(){
         removeTetrad();
         activeTetrad.y++;
+        activeTetrad.lowestPoint++;
+        
+        if(checkCollision()){
+            createTetrad();
+            placeTetrad();
+            activeTetrad = getRandomTetrad();
+        }
         createTetrad();
     }
 
 
     function rotateTetrad(){
-        let {shape, x} = activeTetrad;
+        let {shape, x , y, lowestPoint} = activeTetrad;
 
         const rotatedColumn = shape.length;
         const rotatedRow = shape[0].length;
-
+        const yDifference = rotatedRow-rotatedColumn;
+        const newLowestPoint = lowestPoint + yDifference
+   
         let rotatedShape = []
         for( let col = 0; col < rotatedRow; col++){
             newRow = [];
@@ -159,12 +206,13 @@ let cells = document.getElementsByClassName('cell')
         }
     //stop tetrad rotatoing over the right border
         if(rotatedShape[0].length + x >= numColumns){
-            x = numColumns - rotatedShape[0].length ;
+            x = numColumns - rotatedShape[0].length;
         }
 
         removeTetrad();
         activeTetrad.shape = rotatedShape
         activeTetrad.x = x
+        activeTetrad.lowestPoint =  newLowestPoint
         createTetrad();
     }
     
@@ -188,8 +236,13 @@ let cells = document.getElementsByClassName('cell')
     function moveDown(){
         removeTetrad();
         activeTetrad.y++;
+        activeTetrad.lowestPoint++;
+        if(checkCollision()){
+            createTetrad();
+            placeTetrad();
+            activeTetrad = getRandomTetrad();
+        }
         createTetrad();
-        
     }
 
 
@@ -212,6 +265,7 @@ let activeTetrad = getRandomTetrad()
 
 createTetrad()
 let gameSpeed = 1000;
+//moveTetradDown
 setInterval(moveTetradDown, gameSpeed)
 
 
