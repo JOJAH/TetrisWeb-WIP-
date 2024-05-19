@@ -167,11 +167,35 @@ let cells = document.getElementsByClassName('cell')
             row.forEach((cell, j) =>{
                 if(cell == 1){
                     grid[y+i][x+j] = 1
+
+                // Completed row check    
+                    if(!grid[y+i].includes(0)){
+
+
+                            for(let row = y+i; row>0; row--){
+                                for(let col = 0; col <numColumns; col++){
+                                    grid[row][col] = grid[row-1][col];
+                                    const cell = cells[row * numColumns + col];
+                                    const cellAbove = cells[(row-1) * numColumns + col];
+                                    if(grid[row][col]===1){
+                                        cell.style.background = cellAbove.style.background;
+                                    }else{
+                                        cell.style.removeProperty('background');
+                                    }
+                                }
+                            }
+                            
+                        
+
+                    }
+                    
                 }
             });
         });
+        
     }
-    
+
+
     function moveTetradDown(){
         removeTetrad();
         activeTetrad.y++;
