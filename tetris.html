@@ -202,6 +202,13 @@ let cells = document.getElementsByClassName('cell')
             newRow = [];
             for( let row = rotatedColumn -1 ; row >= 0; row--){ // iterates downwards as to rotate 90 degrees 
                 newRow.push(shape[row][col]);
+            
+            //rotation collision check
+                let newX = x + row;
+                let newY = y+ col;
+                if(grid[newY][newX] == 1){
+                   return
+                }
             }
             rotatedShape.push(newRow)
         }
@@ -251,10 +258,9 @@ let cells = document.getElementsByClassName('cell')
                 for(let i = 0; i < shape.length; i++){
                     for(let j = 0; j < shape[i].length; j++){
                         if(shape[i][j] == 1){
-                            const rightX = x + 1;
+                            const rightX = x + 1 + j;
                             if(grid[y+i][rightX] == 1){
                                 return
-                            
                             }
                         }
                     }
@@ -283,16 +289,16 @@ let cells = document.getElementsByClassName('cell')
 
 
 document.addEventListener('keydown', (event)=>{
-    if(event.key === 'ArrowUp'){
+    if(event.key === 'ArrowUp' || event.key === 'w'){
         rotateTetrad()
     }
-    if(event.key === 'ArrowLeft'){
+    if(event.key === 'ArrowLeft' || event.key === 'a'){
         moveLeft();
     }
-    if(event.key === 'ArrowRight'){
+    if(event.key === 'ArrowRight' || event.key === 'd'){
         moveRight();
     }
-    if(event.key === 'ArrowDown'){
+    if(event.key === 'ArrowDown' || event.key === 's'){
         moveDown();
     }
 });
@@ -303,9 +309,6 @@ createTetrad()
 
 let gameSpeed = 1000;
 let runGame = setInterval(moveTetradDown, gameSpeed);
-
-
-
 
 </script>
 
