@@ -6,22 +6,76 @@
     <title>Document</title>
 </head>
 <body>
-    
-    <div id="tetrisContainer"></div>
+    <div id="wholeContainer">
+        <div class="sides"></div>
+        <div id="middle">
+            <div><h2>Jektris</h1></div>
+            <div id="tetrisContainer"></div>
+            <div id="scoreContainer">
+                <div>
+                    <p>SCORE: <span id="score"> 0</span>
+                </div>
+                <div id="levelDiv">
+                    <p>LEVEL: <span id="level">1</span></p></p>
+                </div>
+                  
+            </div>
+                <div class="movementKeyContainer">
+                    <div class="key" id="empty"></div>
+                    <div class="key"id ="up">🡹</div>
+                    <div class="key" id="empty"></div>
+                    <div class="key" id="left">🡸</div>
+                    <div class="key" id="down">🡻</div>
+                    <div class="key" id="right">🡺</div>
 
+                </div>
+            
+        </div>
+        <div class="sides"></div>
+    </div>
 <style>
-    body{
-        display: flex;
-        justify-content: center;
+    html, body{
+        height: 75%;
+    }
+    #wholeContainer{
+        display: flex; 
+        height: 100%;
     }
     #tetrisContainer{
         display: grid;
         grid-template-columns: repeat(10, 20px);
         
     }
+    .sides{
+        width: 50%;
+    }
     .cell{
         border: 1px solid black;
         height: 20px;
+    }
+    #scoreContainer{
+        display: flex;
+    }
+    #scoreContainer > div{
+        width: 50%;
+    }
+    .movementKeyContainer{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .key{
+        flex: 0 0 30%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+        border: 2px solid black;
+        border-radius: 5px;
+
+    }
+    #empty{
+        border: none;
+        margin: 2px;
     }
 
 </style>
@@ -163,6 +217,7 @@ let cells = document.getElementsByClassName('cell')
 
     function placeTetrad(){
         const {shape, x ,y} = activeTetrad;
+        let rowsCleared = 0;
         shape.forEach((row, i)=>{
             row.forEach((cell, j) =>{
                 if(cell == 1){
@@ -170,8 +225,7 @@ let cells = document.getElementsByClassName('cell')
 
                 // Completed row check    
                     if(!grid[y+i].includes(0)){
-
-
+                        rowsCleared++;
                             for(let row = y+i; row>0; row--){
                                 for(let col = 0; col <numColumns; col++){
                                     grid[row][col] = grid[row-1][col];
@@ -186,13 +240,40 @@ let cells = document.getElementsByClassName('cell')
                             }
                             
                         
+                            totalRowsCleared++
+                            console.log(totalRowsCleared)
+                            if(totalRowsCleared % 10 == 0){
+                                level++
+                                document.getElementById('level').innerHTML = level;
+                                gameSpeed = gameSpeed * 0.9;
+                                clearInterval(runGame);
+                                runGame = setInterval(moveTetradDown, gameSpeed);
+                            }
 
                     }
                     
                 }
             });
+            
         });
         
+        if(rowsCleared == 1){
+            score += (100 + (50 * combiLevel)) * level;
+        }if(rowsCleared == 2){
+            score += (300 + (50 * combiLevel)) * level;
+        }if(rowsCleared == 3){
+            (score += 500 + (50 * combiLevel)) * level;
+        }if(rowsCleared == 4){
+            (score+= 800 + (50 * combiLevel)) * level;
+        }
+        if(rowsCleared == 0){
+            combiLevel = 0;
+        }else{
+            combiLevel++
+            console.log(combiLevel)
+        }
+        document.getElementById('score').innerHTML = score;
+
     }
 
 
@@ -311,21 +392,51 @@ let cells = document.getElementsByClassName('cell')
         }
     }
 
+function changeKeyColour(direction, background, arrow){
+    key = document.getElementById(direction)
+            key.style.background = background;
+            key.style.color = arrow;
+}
+
 
 document.addEventListener('keydown', (event)=>{
     if(event.key === 'ArrowUp' || event.key === 'w'){
         rotateTetrad()
+        changeKeyColour('up','black', 'white')
     }
     if(event.key === 'ArrowLeft' || event.key === 'a'){
         moveLeft();
+        changeKeyColour('left','black', 'white')
     }
     if(event.key === 'ArrowRight' || event.key === 'd'){
         moveRight();
+        changeKeyColour('right','black', 'white')
     }
     if(event.key === 'ArrowDown' || event.key === 's'){
         moveDown();
+        changeKeyColour('down','black', 'white')
     }
 });
+document.addEventListener('keyup', (event)=>{
+    if(event.key === 'ArrowUp' || event.key === 'w'){
+        changeKeyColour('up','white', 'black')
+    }
+    if(event.key === 'ArrowLeft' || event.key === 'a'){
+        changeKeyColour('left','white', 'black')
+    }
+    if(event.key === 'ArrowRight' || event.key === 'd'){
+        changeKeyColour('right','white', 'black')
+    }
+    if(event.key === 'ArrowDown' || event.key === 's'){
+        changeKeyColour('down','white', 'black')
+    }
+});
+
+let level = 1;
+let score = 0;
+let totalRowsCleared = 0;
+let combiLevel = 0;
+
 
 let activeTetrad = getRandomTetrad()
 
