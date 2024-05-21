@@ -23,7 +23,7 @@
                   
             </div>
                 <div class="movementKeyContainer">
-                    <div class="key" id="empty"></div>
+                    <div class="key" id="hold">H</div>
                     <div class="key"id ="up">🡹</div>
                     <div class="key" id="pause">P</div>
                     <div class="key" id="left">🡸</div>
@@ -33,7 +33,9 @@
                 </div>
             
         </div>
-        <div class="sides"></div>
+        <div class="sides">
+            <div id="heldTetradContainer"></div>
+        </div>
     </div>
 <style>
     html, body{
@@ -47,8 +49,11 @@
     }
     #tetrisContainer{
         display: grid;
-        grid-template-columns: repeat(10, 20px);
+        grid-template-columns: repeat(10, 3vh);
         
+    }
+    h2{
+        margin: 8px;
     }
     .sides{
         width: 50%;
@@ -72,7 +77,7 @@
     }
     .cell{
         border: 1px solid black;
-        height: 20px;
+        height: 3vh;
     }
     #scoreContainer{
         display: flex;
@@ -89,15 +94,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 50px;
+        height: 7vh;
         border: 2px solid black;
-        border-radius: 5px;
+        border-radius: 1vh;
         font-weight: bold;
 
     }
     #empty{
         border: none;
         margin: 2px;
+    }
+    #heldTetradContainer{
+        display: grid;
+        margin: 100px;
+    }
+    .heldCell{
+        border: 1px solid black;
+        height: 3vh;
+        width: 3vh;
     }
 
 </style>
@@ -166,6 +180,7 @@
     }
 
     function getRandomTetrad(){
+        canHold = true;
         const tetradKeys = Object.keys(Tetrads)
         let tetrad = tetradKeys[Math.floor(Math.random()*7)]
         
@@ -247,7 +262,7 @@ let cells = document.getElementsByClassName('cell')
         const {shape, x ,y, colour} = activeTetrad;
         let rowsCleared = 0;
         previousTetrad = activeTetrad.type;
-
+        
     // add placedTetrad to the background Display
         let backgroundDisplay = document.getElementById('backgroundDisplay');
         const span = document.createElement('span');
@@ -327,6 +342,7 @@ let cells = document.getElementsByClassName('cell')
         }
         createTetrad();
         if(checkCollision()){
+            play = false;
             clearInterval(runGame);
         }
     }
@@ -359,8 +375,6 @@ let cells = document.getElementsByClassName('cell')
         if(rotatedShape[0].length + x >= numColumns){
             x = numColumns - rotatedShape[0].length;
         }
-
-
 
         removeTetrad();
         activeTetrad.shape = rotatedShape
@@ -426,6 +440,7 @@ let cells = document.getElementsByClassName('cell')
         }
         createTetrad();
         if(checkCollision()){
+            play = false;
             clearInterval(runGame);
         }
     }
@@ -436,51 +451,105 @@ function changeKeyColour(direction, background, arrow){
             key.style.color = arrow;
 }
 
+function holdPiece(){
+    if(canHold){
+        canHold = false;
+
+        if(!heldTetrad){
+            heldTetrad = activeTetrad;
+            removeTetrad();
+            activeTetrad = getRandomTetrad();
+        }else{
+            removeTetrad();
+            let holdingVar = heldTetrad;
+            heldTetrad = activeTetrad;
+            activeTetrad = holdingVar;
+            
+
+            if(activeTetrad.type == 'I'){
+                activeTetrad.lowestPoint = -1;
+            }else{
+                activeTetrad.lowestPoint = 0;
+            }
+            if(activeTetrad.type == 'O'){
+                activeTetrad.x = 4;
+            }else{
+                activeTetrad.x =3;
+            }
+            activeTetrad.y = 0;
+
+        }
+        const heldContaner = document.getElementById('heldTetradContainer');
+        heldContaner.innerHTML = '';
+        heldContaner.style.gridTemplateColumns = 'repeat('+heldTetrad.shape[0].length+',3vh)'
+
+        heldTetrad.shape.forEach((row, i)=>{
+            row.forEach((cell,j)=>{
+                const heldCell = document.createElement('div');
+                heldCell.setAttribute('class', 'heldCell');
+                if(cell == 1){
+                    heldCell.style.background = heldTetrad.colour;
+                }
+                heldContaner.appendChild(heldCell)
+            })
+        })
+        
+        
+    }
+
+}
 
 document.addEventListener('keydown', (event)=>{
-    if(play === true){
+    if(play){
 
         if(event.key === 'ArrowUp' || event.key === 'w'){
             rotateTetrad()
-            changeKeyColour('up','black', 'white')
+            changeKeyColour('up','black', 'white');
         }
         if(event.key === 'ArrowLeft' || event.key === 'a'){
             moveLeft();
-            changeKeyColour('left','black', 'white')
+            changeKeyColour('left','black', 'white');
         }
         if(event.key === 'ArrowRight' || event.key === 'd'){
             moveRight();
-            changeKeyColour('right','black', 'white')
+            changeKeyColour('right','black', 'white');
         }
         if(event.key === 'ArrowDown' || event.key === 's'){
             moveDown();
-            changeKeyColour('down','black', 'white')
+            changeKeyColour('down','black', 'white');
+        }
+        if(event.key === 'h'){
+            holdPiece();
+            changeKeyColour('hold','black', 'white');
         }
     }
     if(event.key === 'p'){
-        if(play == true){
+        if(play){
             play = false;
             clearInterval(runGame);
-            changeKeyColour('pause','red', 'black')
+            changeKeyColour('pause','red', 'black');
         }else{
             play = true;
             runGame = setInterval(moveTetradDown, gameSpeed);
-            changeKeyColour('pause','white', 'black')
+            changeKeyColour('pause','white', 'black');
         }
     }
 });
 document.addEventListener('keyup', (event)=>{
     if(event.key === 'ArrowUp' || event.key === 'w'){
-        changeKeyColour('up','white', 'black')
+        changeKeyColour('up','white', 'black');
     }
     if(event.key === 'ArrowLeft' || event.key === 'a'){
-        changeKeyColour('left','white', 'black')
+        changeKeyColour('left','white', 'black');
     }
     if(event.key === 'ArrowRight' || event.key === 'd'){
-        changeKeyColour('right','white', 'black')
+        changeKeyColour('right','white', 'black');
     }
     if(event.key === 'ArrowDown' || event.key === 's'){
-        changeKeyColour('down','white', 'black')
+        changeKeyColour('down','white', 'black');
+    }
+    if(event.key === 'h'){
+        changeKeyColour('hold','white', 'black');
     }
 });
 
@@ -491,7 +560,10 @@ let score = 0;
 let totalRowsCleared = 0;
 let combiLevel = 0;
 
-let previousTetrad = null;
+let canHold = true;
+let heldTetrad;
+
+let previousTetrad;
 
 let activeTetrad = getRandomTetrad();
 
