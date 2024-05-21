@@ -7,7 +7,9 @@
 </head>
 <body>
     <div id="wholeContainer">
-        <div class="sides"></div>
+        <div class="sides">
+            <p id="backgroundDisplay"></p>
+        </div>
         <div id="middle">
             <div><h2>Jektris</h1></div>
             <div id="tetrisContainer"></div>
@@ -36,6 +38,7 @@
 <style>
     html, body{
         height: 75%;
+        margin: 0px;
     }
     #wholeContainer{
         display: flex; 
@@ -48,6 +51,21 @@
     }
     .sides{
         width: 50%;
+    }
+    #backgroundDisplay{
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: 8px;
+        margin-left: 8px;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    #backgroundDisplay > span{
+        margin: 1px;
+        margin-bottom: 2px;
+        height: 12px;
+        flex: 0 0 auto;
+        display: inline-block;
+        text-align: center;
     }
     .cell{
         border: 1px solid black;
@@ -145,7 +163,13 @@
 
     function getRandomTetrad(){
         const tetradKeys = Object.keys(Tetrads)
-        const tetrad = tetradKeys[Math.floor(Math.random()*7)]
+        let tetrad = tetradKeys[Math.floor(Math.random()*7)]
+        
+        if(tetrad == previousTetrad){
+            console.log('same')
+            tetrad = tetradKeys[Math.floor(Math.random()*7)]
+        }
+
         if(tetrad == 'I'){
             lowestPoint = -1;
         }else{
@@ -216,14 +240,24 @@ let cells = document.getElementsByClassName('cell')
     }
 
     function placeTetrad(){
-        const {shape, x ,y} = activeTetrad;
+        const {shape, x ,y, colour} = activeTetrad;
         let rowsCleared = 0;
+        previousTetrad = activeTetrad.type;
+
+    // add placedTetrad to the background Display
+        let backgroundDisplay = document.getElementById('backgroundDisplay');
+        const span = document.createElement('span');
+        span.textContent = previousTetrad;
+        span.style.color = colour;
+        backgroundDisplay.append(span);
+
+        console.log(previousTetrad)
         shape.forEach((row, i)=>{
             row.forEach((cell, j) =>{
                 if(cell == 1){
                     grid[y+i][x+j] = 1
 
-                // Completed row check    
+                // update completed Rows   
                     if(!grid[y+i].includes(0)){
                         rowsCleared++;
                             for(let row = y+i; row>0; row--){
@@ -239,9 +273,9 @@ let cells = document.getElementsByClassName('cell')
                                 }
                             }
                             
-                        
-                            totalRowsCleared++
-                            console.log(totalRowsCleared)
+                        //update total Cleared Rows and Levelling system
+                            totalRowsCleared++;
+
                             if(totalRowsCleared % 10 == 0){
                                 level++
                                 document.getElementById('level').innerHTML = level;
@@ -437,8 +471,9 @@ let score = 0;
 let totalRowsCleared = 0;
 let combiLevel = 0;
 
+let previousTetrad = null;
 
-let activeTetrad = getRandomTetrad()
+let activeTetrad = getRandomTetrad();
 
 createTetrad()
 
