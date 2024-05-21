@@ -181,6 +181,7 @@
 
     function getRandomTetrad(){
         canHold = true;
+        rotated = false;
         const tetradKeys = Object.keys(Tetrads)
         let tetrad = tetradKeys[Math.floor(Math.random()*7)]
         
@@ -349,6 +350,12 @@ let cells = document.getElementsByClassName('cell')
 
 
     function rotateTetrad(){
+        //checking state of rotate for holding
+        if(!rotated){
+            rotated = true;
+        }else{
+            rotated = false;
+        }
         let {shape, x , y, lowestPoint} = activeTetrad;
 
         const rotatedColumn = shape.length;
@@ -455,6 +462,10 @@ function holdPiece(){
     if(canHold){
         canHold = false;
 
+        if(rotated){
+            rotateTetrad();
+        }
+
         if(!heldTetrad){
             heldTetrad = activeTetrad;
             removeTetrad();
@@ -465,6 +476,7 @@ function holdPiece(){
             heldTetrad = activeTetrad;
             activeTetrad = holdingVar;
             
+            activeTetrad.y = 0;
 
             if(activeTetrad.type == 'I'){
                 activeTetrad.lowestPoint = -1;
@@ -474,9 +486,9 @@ function holdPiece(){
             if(activeTetrad.type == 'O'){
                 activeTetrad.x = 4;
             }else{
-                activeTetrad.x =3;
+                activeTetrad.x = 3;
             }
-            activeTetrad.y = 0;
+            
 
         }
         const heldContaner = document.getElementById('heldTetradContainer');
@@ -560,6 +572,7 @@ let score = 0;
 let totalRowsCleared = 0;
 let combiLevel = 0;
 
+let rotated;
 let canHold = true;
 let heldTetrad;
 
