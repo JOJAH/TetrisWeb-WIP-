@@ -33,8 +33,16 @@
                 </div>
             
         </div>
-        <div class="sides">
-            <div id="heldTetradContainer"></div>
+        <div class="sides" id="right">
+            <div>
+                <div id="heldTitle">Held Tetrad:</div>
+                <div id="heldTetradContainer"></div>
+            </div>
+
+            <div>
+                
+            </div>
+            
         </div>
     </div>
 <style>
@@ -100,13 +108,17 @@
         font-weight: bold;
 
     }
-    #empty{
-        border: none;
-        margin: 2px;
-    }
+
     #heldTetradContainer{
         display: grid;
-        margin: 100px;
+        justify-content: center;
+    }
+    #right{
+        display: flex;
+    }
+    #heldTitle{
+        margin-top: 5vh;
+        margin-left: 5vh;
     }
     .heldCell{
         border: 1px solid black;
@@ -501,14 +513,13 @@ function holdPiece(){
                 heldCell.setAttribute('class', 'heldCell');
                 if(cell == 1){
                     heldCell.style.background = heldTetrad.colour;
+                }else{
+                    heldCell.style.border = 'none';
                 }
                 heldContaner.appendChild(heldCell)
             })
-        })
-        
-        
+        });
     }
-
 }
 
 document.addEventListener('keydown', (event)=>{
