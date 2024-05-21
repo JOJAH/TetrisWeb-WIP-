@@ -25,7 +25,7 @@
                 <div class="movementKeyContainer">
                     <div class="key" id="empty"></div>
                     <div class="key"id ="up">🡹</div>
-                    <div class="key" id="empty"></div>
+                    <div class="key" id="pause">P</div>
                     <div class="key" id="left">🡸</div>
                     <div class="key" id="down">🡻</div>
                     <div class="key" id="right">🡺</div>
@@ -39,6 +39,7 @@
     html, body{
         height: 75%;
         margin: 0px;
+        font-family: 'Courier New', Courier, monospace;
     }
     #wholeContainer{
         display: flex; 
@@ -57,7 +58,6 @@
         flex-wrap: wrap;
         margin-right: 8px;
         margin-left: 8px;
-        font-family: 'Courier New', Courier, monospace;
     }
     #backgroundDisplay > span{
         margin: 1px;
@@ -66,6 +66,9 @@
         flex: 0 0 auto;
         display: inline-block;
         text-align: center;
+        align-content: center;
+        font-weight: bold;
+        top: 0;
     }
     .cell{
         border: 1px solid black;
@@ -89,6 +92,7 @@
         height: 50px;
         border: 2px solid black;
         border-radius: 5px;
+        font-weight: bold;
 
     }
     #empty{
@@ -434,21 +438,35 @@ function changeKeyColour(direction, background, arrow){
 
 
 document.addEventListener('keydown', (event)=>{
-    if(event.key === 'ArrowUp' || event.key === 'w'){
-        rotateTetrad()
-        changeKeyColour('up','black', 'white')
+    if(play === true){
+
+        if(event.key === 'ArrowUp' || event.key === 'w'){
+            rotateTetrad()
+            changeKeyColour('up','black', 'white')
+        }
+        if(event.key === 'ArrowLeft' || event.key === 'a'){
+            moveLeft();
+            changeKeyColour('left','black', 'white')
+        }
+        if(event.key === 'ArrowRight' || event.key === 'd'){
+            moveRight();
+            changeKeyColour('right','black', 'white')
+        }
+        if(event.key === 'ArrowDown' || event.key === 's'){
+            moveDown();
+            changeKeyColour('down','black', 'white')
+        }
     }
-    if(event.key === 'ArrowLeft' || event.key === 'a'){
-        moveLeft();
-        changeKeyColour('left','black', 'white')
-    }
-    if(event.key === 'ArrowRight' || event.key === 'd'){
-        moveRight();
-        changeKeyColour('right','black', 'white')
-    }
-    if(event.key === 'ArrowDown' || event.key === 's'){
-        moveDown();
-        changeKeyColour('down','black', 'white')
+    if(event.key === 'p'){
+        if(play == true){
+            play = false;
+            clearInterval(runGame);
+            changeKeyColour('pause','red', 'black')
+        }else{
+            play = true;
+            runGame = setInterval(moveTetradDown, gameSpeed);
+            changeKeyColour('pause','white', 'black')
+        }
     }
 });
 document.addEventListener('keyup', (event)=>{
@@ -465,6 +483,8 @@ document.addEventListener('keyup', (event)=>{
         changeKeyColour('down','white', 'black')
     }
 });
+
+let play = true;
 
 let level = 1;
 let score = 0;
