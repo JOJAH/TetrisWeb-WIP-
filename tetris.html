@@ -11,7 +11,10 @@
             <p id="backgroundDisplay"></p>
         </div>
         <div id="middle">
-            <div><h2>Jektris</h1></div>
+            <div id="header">
+                <h2>Jektris</h1>
+                <button id="startReloadButton" onclick="startGame()">Start</button>
+            </div>
             <div id="tetrisContainer"></div>
             <div id="scoreContainer">
                 <div>
@@ -62,11 +65,19 @@
         grid-template-columns: repeat(10, 3vh);
         
     }
+    #header{
+        display: flex;
+    }
     h2{
         margin: 0.5vh;
     }
+    #startReloadButton{
+        width: 100%;
+        margin: 2px;
+    }
     .sides{
         width: 50%;
+        
     }
     #backgroundDisplay{
         display: flex;
@@ -120,6 +131,7 @@
         display: grid;
         justify-content: center;
         margin-left: 5vh;
+        height: 5vh;
     }
     #right{
         display: flex;
@@ -133,7 +145,6 @@
         height: 3vh;
         width: 3vh;
     }
-
 </style>
 
 <script>
@@ -193,11 +204,7 @@
     }
 
     // set grid elements to empty
-    let grid = [];
-    for(let i=0; i< numRows; i++ ){
-        row = Array(numColumns).fill(0);
-        grid.push(row);
-    }
+    
     let nextTetrad = null;
     function getRandomTetrad(){
         canHold = true;
@@ -211,8 +218,6 @@
             tetrad = tetradKeys[Math.floor(Math.random()*7)]
             }
         }
-        
-        
 
         if(tetrad == 'I'){
             lowestPoint = -1;
@@ -303,6 +308,7 @@ let cells = document.getElementsByClassName('cell')
                 // update completed Rows   
                     if(!grid[y+i].includes(0)){
                         rowsCleared++;
+                        
                             for(let row = y+i; row>0; row--){
                                 for(let col = 0; col <numColumns; col++){
                                     grid[row][col] = grid[row-1][col];
@@ -318,7 +324,7 @@ let cells = document.getElementsByClassName('cell')
                             
                         //update total Cleared Rows and Levelling system
                             totalRowsCleared++;
-
+                            console.log(totalRowsCleared)
                             if(totalRowsCleared % 10 == 0){
                                 level++
                                 document.getElementById('level').innerHTML = level;
@@ -346,7 +352,7 @@ let cells = document.getElementsByClassName('cell')
         if(rowsCleared == 0){
             combiLevel = 0;
         }else{
-            combiLevel++
+            combiLevel++;
         }
         document.getElementById('score').innerHTML = score;
     }
@@ -385,7 +391,7 @@ let cells = document.getElementsByClassName('cell')
         const rotatedColumn = shape.length;
         const rotatedRow = shape[0].length;
         const yDifference = rotatedRow-rotatedColumn;
-        const newLowestPoint = lowestPoint + yDifference
+        const newLowestPoint = lowestPoint + yDifference;
    
         let rotatedShape = []
         for( let col = 0; col < rotatedRow; col++){
@@ -400,7 +406,7 @@ let cells = document.getElementsByClassName('cell')
                    return
                 }
             }
-            rotatedShape.push(newRow)
+            rotatedShape.push(newRow);
         }
     //stop tetrad rotatoing over the right border
         if(rotatedShape[0].length + x >= numColumns){
@@ -408,9 +414,9 @@ let cells = document.getElementsByClassName('cell')
         }
 
         removeTetrad();
-        activeTetrad.shape = rotatedShape
-        activeTetrad.x = x
-        activeTetrad.lowestPoint =  newLowestPoint
+        activeTetrad.shape = rotatedShape;
+        activeTetrad.x = x;
+        activeTetrad.lowestPoint = newLowestPoint;
         createTetrad();
     }
     
@@ -419,18 +425,16 @@ let cells = document.getElementsByClassName('cell')
         let {shape, x , y} = activeTetrad;
         if(x > 0){
         //adds collision for moving terads with placed tetrads when moving left
-        for(let i = 0; i < shape.length; i++){
-            for(let j = 0; j < shape[i].length; j++){
-                if(shape[i][j] == 1){
-                    const leftX = x - 1 + j;
-                    if(grid[y+i][leftX] == 1){
-                        return
-                    
+            for(let i = 0; i < shape.length; i++){
+                for(let j = 0; j < shape[i].length; j++){
+                    if(shape[i][j] == 1){
+                        const leftX = x - 1 + j;
+                        if(grid[y+i][leftX] == 1){
+                            return
+                        }
                     }
                 }
             }
-            
-        }
         removeTetrad();
             activeTetrad.x--;
             createTetrad();
@@ -479,68 +483,68 @@ let cells = document.getElementsByClassName('cell')
         }
     }
 
-function changeKeyColour(direction, background, arrow){
-    key = document.getElementById(direction)
-            key.style.background = background;
-            key.style.color = arrow;
-}
+    function changeKeyColour(direction, background, arrow){
+        key = document.getElementById(direction)
+                key.style.background = background;
+                key.style.color = arrow;
+    }
 
-function renderTetradHoldNext(renderTetrad,containerId){
-        const heldContaner = document.getElementById(containerId);
-        heldContaner.innerHTML = '';
-        heldContaner.style.gridTemplateColumns = 'repeat('+renderTetrad.shape[0].length+',3vh)'
+    function renderTetradHoldNext(renderTetrad,containerId){
+            const heldContaner = document.getElementById(containerId);
+            heldContaner.innerHTML = '';
+            heldContaner.style.gridTemplateColumns = 'repeat('+renderTetrad.shape[0].length+',3vh)'
 
-        renderTetrad.shape.forEach((row, i)=>{
-            row.forEach((cell,j)=>{
-                const heldCell = document.createElement('div');
-                heldCell.setAttribute('class', 'heldCell');
-                if(cell == 1){
-                    heldCell.style.background = renderTetrad.colour;
-                }else{
-                    heldCell.style.border = 'none';
-                }
-                heldContaner.appendChild(heldCell)
+            renderTetrad.shape.forEach((row, i)=>{
+                row.forEach((cell,j)=>{
+                    const heldCell = document.createElement('div');
+                    heldCell.setAttribute('class', 'heldCell');
+                    if(cell == 1){
+                        heldCell.style.background = renderTetrad.colour;
+                    }else{
+                        heldCell.style.border = 'none';
+                    }
+                    heldContaner.appendChild(heldCell)
+                });
             });
-        });
-    }
-
-function holdPiece(){
-    if(canHold){
-        canHold = false;
-
-        if(rotated){
-            rotateTetrad();
         }
 
-        if(!heldTetrad){
-            heldTetrad = activeTetrad;
-            removeTetrad();
-            activeTetrad = nextTetrad;
-            nextTetrad = getRandomTetrad();
-        }else{
-            removeTetrad();
-            let holdingVar = heldTetrad;
-            heldTetrad = activeTetrad;
-            activeTetrad = holdingVar;
+    function holdPiece(){
+        if(canHold){
+            canHold = false;
+
+            if(rotated){
+                rotateTetrad();
+            }
+
+            if(!heldTetrad){
+                heldTetrad = activeTetrad;
+                removeTetrad();
+                activeTetrad = nextTetrad;
+                nextTetrad = getRandomTetrad();
+            }else{
+                removeTetrad();
+                let holdingVar = heldTetrad;
+                heldTetrad = activeTetrad;
+                activeTetrad = holdingVar;
+                
+                activeTetrad.y = 0;
+
+                if(activeTetrad.type == 'I'){
+                    activeTetrad.lowestPoint = -1;
+                }else{
+                    activeTetrad.lowestPoint = 0;
+                }
+                if(activeTetrad.type == 'O'){
+                    activeTetrad.x = 4;
+                }else{
+                    activeTetrad.x = 3;
+                }
+            }
+            renderTetradHoldNext(heldTetrad,'heldTetradContainer');
+            renderTetradHoldNext(nextTetrad,'nextTetradContainer');
             
-            activeTetrad.y = 0;
-
-            if(activeTetrad.type == 'I'){
-                activeTetrad.lowestPoint = -1;
-            }else{
-                activeTetrad.lowestPoint = 0;
-            }
-            if(activeTetrad.type == 'O'){
-                activeTetrad.x = 4;
-            }else{
-                activeTetrad.x = 3;
-            }
         }
-        renderTetradHoldNext(heldTetrad,'heldTetradContainer');
-        renderTetradHoldNext(nextTetrad,'nextTetradContainer');
-        
     }
-}
 
 document.addEventListener('keydown', (event)=>{
     if(play){
@@ -596,29 +600,74 @@ document.addEventListener('keyup', (event)=>{
     }
 });
 
-let play = true;
+function startGame(){
+    if(!play){
+        grid = [];
+        for(let i=0; i< numRows; i++ ){
+            row = Array(numColumns).fill(0);
+            grid.push(row);
+        }
+        play = true;
+        document.getElementById('startReloadButton').innerHTML = 'Reload';
+        // reset
+        score = 0;
+        document.getElementById('score').innerHTML = score;
+        level = 1;
+        document.getElementById('level').innerHTML = level;
+        let totalRowsCleared = 0;
+        let gameSpeed = 1000;
+
+        activeTetrad = getRandomTetrad();
+        nextTetrad = getRandomTetrad();
+
+        renderTetradHoldNext(nextTetrad,'nextTetradContainer');
+        createTetrad();
+        
+        runGame = setInterval(moveTetradDown, gameSpeed);
+    }else{
+        play = false;
+        document.getElementById('startReloadButton').innerHTML = 'Start';
+        clearInterval(runGame);
+        for(let i = 0; i < cells.length; i++){
+            cells[i] = 0;
+            cells[i].style.removeProperty('background')
+            cells[i].classList.remove('moving');
+        }
+        activeTetrad = getRandomTetrad();
+        heldTetrad = null;
+        const heldCells = document.getElementsByClassName('heldCell');
+        for(let i = 0; i < heldCells.length; i++){
+            heldCells[i].style.removeProperty('background')
+            heldCells[i].style.border = 'none';
+        }
+
+    }
+
+}
+
+let play = false;
+
+let grid = [];
+
+let activeTetrad;
 
 let level = 1;
 let score = 0;
 let totalRowsCleared = 0;
 let combiLevel = 0;
+let gameSpeed = 1000;
 
 let rotated;
 let canHold = true;
+
 let heldTetrad;
 
 let previousTetrad;
 
-let activeTetrad = getRandomTetrad();
-nextTetrad = getRandomTetrad();
-renderTetradHoldNext(nextTetrad,'nextTetradContainer');
+let runGame;
 
 
-createTetrad()
 
-
-let gameSpeed = 1000;
-let runGame = setInterval(moveTetradDown, gameSpeed);
 
 </script>
 
