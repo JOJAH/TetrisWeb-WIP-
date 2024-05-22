@@ -15,10 +15,10 @@
             <div id="tetrisContainer"></div>
             <div id="scoreContainer">
                 <div>
-                    <p>SCORE: <span id="score"> 0</span>
+                    <p>SCORE: <br><span id="score"> 0</span>
                 </div>
                 <div id="levelDiv">
-                    <p>LEVEL: <span id="level">1</span></p></p>
+                    <p>LEVEL: <br><span id="level"> 1</span></p></p>
                 </div>
                   
             </div>
@@ -35,6 +35,8 @@
         </div>
         <div class="sides" id="right">
             <div>
+                <div id="nextTitle">Next Tetrad:</div>
+                <div id="nextTetradContainer"></div>
                 <div id="heldTitle">Held Tetrad:</div>
                 <div id="heldTetradContainer"></div>
             </div>
@@ -61,7 +63,7 @@
         
     }
     h2{
-        margin: 8px;
+        margin: 0.5vh;
     }
     .sides{
         width: 50%;
@@ -87,8 +89,12 @@
         border: 1px solid black;
         height: 3vh;
     }
+    #scoreContainer > div > p{
+        margin: 1px;
+    }
     #scoreContainer{
         display: flex;
+        width: auto
     }
     #scoreContainer > div{
         width: 50%;
@@ -96,6 +102,7 @@
     .movementKeyContainer{
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
     }
     .key{
         flex: 0 0 30%;
@@ -109,14 +116,15 @@
 
     }
 
-    #heldTetradContainer{
+    #heldTetradContainer, #nextTetradContainer{
         display: grid;
         justify-content: center;
+        margin-left: 5vh;
     }
     #right{
         display: flex;
     }
-    #heldTitle{
+    #nextTitle, #heldTitle{
         margin-top: 5vh;
         margin-left: 5vh;
     }
@@ -190,17 +198,21 @@
         row = Array(numColumns).fill(0);
         grid.push(row);
     }
-
+    let nextTetrad = null;
     function getRandomTetrad(){
         canHold = true;
         rotated = false;
         const tetradKeys = Object.keys(Tetrads)
         let tetrad = tetradKeys[Math.floor(Math.random()*7)]
         
-        if(tetrad == previousTetrad){
+        if(nextTetrad){
+            if(tetrad == nextTetrad.type){
             console.log('same')
             tetrad = tetradKeys[Math.floor(Math.random()*7)]
+            }
         }
+        
+        
 
         if(tetrad == 'I'){
             lowestPoint = -1;
@@ -283,7 +295,6 @@ let cells = document.getElementsByClassName('cell')
         span.style.color = colour;
         backgroundDisplay.append(span);
 
-        console.log(previousTetrad)
         shape.forEach((row, i)=>{
             row.forEach((cell, j) =>{
                 if(cell == 1){
@@ -336,10 +347,8 @@ let cells = document.getElementsByClassName('cell')
             combiLevel = 0;
         }else{
             combiLevel++
-            console.log(combiLevel)
         }
         document.getElementById('score').innerHTML = score;
-
     }
 
 
@@ -351,7 +360,10 @@ let cells = document.getElementsByClassName('cell')
         if(checkCollision()){
             createTetrad();
             placeTetrad();
-            activeTetrad = getRandomTetrad();
+            
+            activeTetrad = nextTetrad;
+            nextTetrad = getRandomTetrad();
+            renderTetradHoldNext(nextTetrad,'nextTetradContainer');
         }
         createTetrad();
         if(checkCollision()){
@@ -455,7 +467,10 @@ let cells = document.getElementsByClassName('cell')
         if(checkCollision()){
             createTetrad();
             placeTetrad();
-            activeTetrad = getRandomTetrad();
+            
+            activeTetrad = nextTetrad;
+            nextTetrad = getRandomTetrad();
+            renderTetradHoldNext(nextTetrad,'nextTetradContainer');
         }
         createTetrad();
         if(checkCollision()){
@@ -470,6 +485,25 @@ function changeKeyColour(direction, background, arrow){
             key.style.color = arrow;
 }
 
+function renderTetradHoldNext(renderTetrad,containerId){
+        const heldContaner = document.getElementById(containerId);
+        heldContaner.innerHTML = '';
+        heldContaner.style.gridTemplateColumns = 'repeat('+renderTetrad.shape[0].length+',3vh)'
+
+        renderTetrad.shape.forEach((row, i)=>{
+            row.forEach((cell,j)=>{
+                const heldCell = document.createElement('div');
+                heldCell.setAttribute('class', 'heldCell');
+                if(cell == 1){
+                    heldCell.style.background = renderTetrad.colour;
+                }else{
+                    heldCell.style.border = 'none';
+                }
+                heldContaner.appendChild(heldCell)
+            });
+        });
+    }
+
 function holdPiece(){
     if(canHold){
         canHold = false;
@@ -481,7 +515,8 @@ function holdPiece(){
         if(!heldTetrad){
             heldTetrad = activeTetrad;
             removeTetrad();
-            activeTetrad = getRandomTetrad();
+            activeTetrad = nextTetrad;
+            nextTetrad = getRandomTetrad();
         }else{
             removeTetrad();
             let holdingVar = heldTetrad;
@@ -500,25 +535,10 @@ function holdPiece(){
             }else{
                 activeTetrad.x = 3;
             }
-            
-
         }
-        const heldContaner = document.getElementById('heldTetradContainer');
-        heldContaner.innerHTML = '';
-        heldContaner.style.gridTemplateColumns = 'repeat('+heldTetrad.shape[0].length+',3vh)'
-
-        heldTetrad.shape.forEach((row, i)=>{
-            row.forEach((cell,j)=>{
-                const heldCell = document.createElement('div');
-                heldCell.setAttribute('class', 'heldCell');
-                if(cell == 1){
-                    heldCell.style.background = heldTetrad.colour;
-                }else{
-                    heldCell.style.border = 'none';
-                }
-                heldContaner.appendChild(heldCell)
-            })
-        });
+        renderTetradHoldNext(heldTetrad,'heldTetradContainer');
+        renderTetradHoldNext(nextTetrad,'nextTetradContainer');
+        
     }
 }
 
@@ -590,8 +610,12 @@ let heldTetrad;
 let previousTetrad;
 
 let activeTetrad = getRandomTetrad();
+nextTetrad = getRandomTetrad();
+renderTetradHoldNext(nextTetrad,'nextTetradContainer');
+
 
 createTetrad()
+
 
 let gameSpeed = 1000;
 let runGame = setInterval(moveTetradDown, gameSpeed);
